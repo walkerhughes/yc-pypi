@@ -3,7 +3,7 @@
 ############################
 
 [project]
-name = "yc-pypi"
+name = "yc-central"
 description = "My package description"
 authors = [{ name = "<your name>", email = "some-email@gmail.com" }]
 readme = "README.md"

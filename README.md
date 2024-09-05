@@ -1,9 +1,12 @@
-# yc-pypi
+# Yield Curve Central PyPi Package Distribution
+
+Efficient, lightweight python package for interacting and analyzing the US Treasury Yield Curve through
+data from AlphaVantage API web endpoints.
 
 ## Quick start
 
 ```bash
-pip install yc-pypi
+pip install yc-central
 ```
 
 ```python
