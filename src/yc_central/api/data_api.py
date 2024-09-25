@@ -5,6 +5,19 @@ import asyncio
 import aiohttp
 
 
+def get_historical_yield_data_endpoints(interval: str, api_key: str) -> dict:
+    # Return dict of API endpoints for given time interval and API key.
+    return {
+        "FedFunds": f"function=FEDERAL_FUNDS_RATE&interval={interval}&apikey={api_key}",
+        "3month": f"function=TREASURY_YIELD&interval={interval}&maturity=3month&apikey={api_key}",
+        "2year": f"function=TREASURY_YIELD&interval={interval}&maturity=2year&apikey={api_key}",
+        "5year": f"function=TREASURY_YIELD&interval={interval}&maturity=5year&apikey={api_key}",
+        "7year": f"function=TREASURY_YIELD&interval={interval}&maturity=7year&apikey={api_key}",
+        "10year": f"function=TREASURY_YIELD&interval={interval}&maturity=10year&apikey={api_key}",
+        "30year": f"function=TREASURY_YIELD&interval={interval}&maturity=30year&apikey={api_key}",
+    }
+
+
 class AsyncDataAPI:
     """Wrapper around AlphaVantageAPI to fetch historical treasury data."""
 
@@ -13,6 +26,8 @@ class AsyncDataAPI:
         self.api_key = api_key
         self.yc_data = None
         self.economic_data = None
+
+        # dict of endpoints we will hit for historical data
 
     async def get_data(self, endpoint, params=None):
         """
@@ -65,18 +80,8 @@ class AsyncDataAPI:
         if interval not in {"daily", "weekly", "monthly"}:
             raise ValueError("Interval value must be one of: 'daily', 'weekly', 'monthly'")
 
-        # dict of endpoints we will hit for historical data
-        endpoints = {
-            "FedFunds": f"function=FEDERAL_FUNDS_RATE&interval={interval}&apikey={self.api_key}",
-            "3month": f"function=TREASURY_YIELD&interval={interval}&maturity=3month&apikey={self.api_key}",
-            "2year": f"function=TREASURY_YIELD&interval={interval}&maturity=2year&apikey={self.api_key}",
-            "5year": f"function=TREASURY_YIELD&interval={interval}&maturity=5year&apikey={self.api_key}",
-            "7year": f"function=TREASURY_YIELD&interval={interval}&maturity=7year&apikey={self.api_key}",
-            "10year": f"function=TREASURY_YIELD&interval={interval}&maturity=10year&apikey={self.api_key}",
-            "30year": f"function=TREASURY_YIELD&interval={interval}&maturity=30year&apikey={self.api_key}",
-        }
-
         # retrieve data from API and save to class attribute
+        endpoints = get_historical_yield_data_endpoints(interval, self.api_key)
         tasks = [self.get_data(endpoint) for endpoint in endpoints.values()]
         responses = await asyncio.gather(*tasks)
         self.yc_data = {
