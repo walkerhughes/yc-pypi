@@ -6,7 +6,18 @@ import aiohttp
 
 
 def get_historical_yield_data_endpoints(interval: str, api_key: str) -> dict:
-    # Return dict of API endpoints for given time interval and API key.
+    """Return dict of API endpoints for given time interval and API key.
+
+    Args
+    ----
+        interval (str): Specify the interval for the yield data.
+        - Must be one of 'daily', 'weekly', or 'monthly'.
+        api_key (str): API key for AlphaVantageAPI.
+
+    Returns
+    -------
+        dict: Dictionary of API endpoints to hit for historical data.
+    """
     return {
         "FedFunds": f"function=FEDERAL_FUNDS_RATE&interval={interval}&apikey={api_key}",
         "3month": f"function=TREASURY_YIELD&interval={interval}&maturity=3month&apikey={api_key}",
