@@ -16,14 +16,14 @@ class AsyncDataAPI:
 
     async def get_data(self, endpoint, params=None):
         """
-        Fetches data from the specified endpoint of the AlphaVantage API.
+        Fetch data from the specified endpoint of the AlphaVantage API.
 
         Args:
-            endpoint (str): The specific API endpoint to fetch data from.
+            endpoint (str): API endpoint to fetch data from.
             params (dict, optional): Additional parameters to include in the request.
 
         Returns:
-            dict: The JSON response from the API if the request is successful.
+            dict: Return the JSON response from the API if the request is successful.
 
         Raises:
             aiohttp.ClientResponseError: If the response status is not 200.
@@ -41,16 +41,17 @@ class AsyncDataAPI:
 
     async def get_yields(self, interval: str = "daily"):
         """
-        Fetches yield data for various yield maturities from the AlphaVantage API.
+        Fetch yield data for various yield maturities from the AlphaVantage API.
 
         Args:
-            interval (str): The interval for the yield data. Must be one of 'daily', 'weekly', or 'monthly'.
+            interval (str): Specify the interval for the yield data.
+            - Must be one of 'daily', 'weekly', or 'monthly'.
 
         Raises:
-            ValueError: If the provided interval is not one of the allowed values.
+            ValueError: Raise error if the provided interval is not one of the allowed values.
 
         Returns:
-            None: The method populates the instance variable `yc_data` with the fetched yield data.
+            None: Populate the instance variable `yc_data` with the fetched yield data.
         """
         if interval not in {"daily", "weekly", "monthly"}:
             raise ValueError("Interval value must be one of: 'daily', 'weekly', 'monthly'")
@@ -81,13 +82,13 @@ class AsyncDataAPI:
 
     async def get_economic_data(self, interval: str = "daily"):
         """
-        Fetches economic data from the AlphaVantage API for CPI, Real GDP per Capita, and Inflation.
+        Fetch economic data from the AlphaVantage API for CPI, Real GDP per Capita, and Inflation.
 
         Raises:
-            ValueError: If the provided interval is not one of the allowed values.
+            ValueError: Raise error if the provided interval is not one of the allowed values.
 
         Returns:
-            dict: A dictionary containing the fetched economic data.
+            None: Populate the instance variable `economic_data` with the fetched data.
         """
         if interval not in {"daily", "weekly", "monthly"}:
             raise ValueError("Interval value must be one of: 'daily', 'weekly', 'monthly'")
