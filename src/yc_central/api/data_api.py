@@ -18,15 +18,19 @@ class AsyncDataAPI:
         """
         Fetch data from the specified endpoint of the AlphaVantage API.
 
-        Args:
+        Args
+        ----
             endpoint (str): API endpoint to fetch data from.
             params (dict, optional): Additional parameters to include in the request.
 
-        Returns:
+        Returns
+        -------
             dict: Return the JSON response from the API if the request is successful.
 
-        Raises:
+        Raises
+        ------
             aiohttp.ClientResponseError: If the response status is not 200.
+
         """
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -43,16 +47,21 @@ class AsyncDataAPI:
         """
         Fetch yield data for various yield maturities from the AlphaVantage API.
 
-        Args:
+        Args
+        ----
             interval (str): Specify the interval for the yield data.
             - Must be one of 'daily', 'weekly', or 'monthly'.
 
-        Raises:
+        Raises
+        ------
             ValueError: Raise error if the provided interval is not one of the allowed values.
 
-        Returns:
+        Returns
+        -------
             None: Populate the instance variable `yc_data` with the fetched yield data.
+
         """
+        # check if interval is valid for API call
         if interval not in {"daily", "weekly", "monthly"}:
             raise ValueError("Interval value must be one of: 'daily', 'weekly', 'monthly'")
 
@@ -84,12 +93,16 @@ class AsyncDataAPI:
         """
         Fetch economic data from the AlphaVantage API for CPI, Real GDP per Capita, and Inflation.
 
-        Raises:
+        Raises
+        ------
             ValueError: Raise error if the provided interval is not one of the allowed values.
 
-        Returns:
+        Returns
+        -------
             None: Populate the instance variable `economic_data` with the fetched data.
+
         """
+        # check if interval is valid for API call
         if interval not in {"daily", "weekly", "monthly"}:
             raise ValueError("Interval value must be one of: 'daily', 'weekly', 'monthly'")
 
