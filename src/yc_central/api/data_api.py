@@ -6,9 +6,7 @@ import aiohttp
 
 
 class AsyncDataAPI:
-    """
-    Wrapper around AlphaVantageAPI to fetch historical treasury data.
-    """
+    """Wrapper around AlphaVantageAPI to fetch historical treasury data."""
 
     def __init__(self, api_key):
         self.base_url = "https://www.alphavantage.co/query?"
@@ -39,8 +37,7 @@ class AsyncDataAPI:
             async with session.get(url, headers=headers, params=params) as response:
                 if response.status == 200:
                     return await response.json()
-                else:
-                    response.raise_for_status()
+                response.raise_for_status()
 
     async def get_yields(self, interval: str = "daily"):
         """
@@ -85,16 +82,24 @@ class AsyncDataAPI:
     async def get_economic_data(self, interval: str = "daily"):
         """
         Fetches economic data from the AlphaVantage API for CPI, Real GDP per Capita, and Inflation.
+
+        Raises:
+            ValueError: If the provided interval is not one of the allowed values.
+
         Returns:
             dict: A dictionary containing the fetched economic data.
         """
+        if interval not in {"daily", "weekly", "monthly"}:
+            raise ValueError("Interval value must be one of: 'daily', 'weekly', 'monthly'")
+
+        # dict of endpoints we will hit for historical data
         endpoints = {
             "CPI": f"function=CPI&interval={interval}&apikey={self.api_key}",
             "RealGDPPerCapita": f"function=REAL_GDP_PER_CAPITA&apikey={self.api_key}",
             "Inflation": f"function=INFLATION&apikey={self.api_key}",
         }
 
-        # retrieve data from API and return as a dictionary
+        # retrieve data from API and save to class attribute
         tasks = [self.get_data(endpoint) for endpoint in endpoints.values()]
         responses = await asyncio.gather(*tasks)
         self.economic_data = {
