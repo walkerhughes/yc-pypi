@@ -14,6 +14,7 @@ class AsyncDataAPI:
         self.base_url = "https://www.alphavantage.co/query?"
         self.api_key = api_key
         self.yc_data = None
+        self.economic_data = None
 
     async def get_data(self, endpoint, params=None):
         """
@@ -79,4 +80,25 @@ class AsyncDataAPI:
             "7year": responses[4],
             "10year": responses[5],
             "30year": responses[6],
+        }
+
+    async def get_economic_data(self, interval: str = "daily"):
+        """
+        Fetches economic data from the AlphaVantage API for CPI, Real GDP per Capita, and Inflation.
+        Returns:
+            dict: A dictionary containing the fetched economic data.
+        """
+        endpoints = {
+            "CPI": f"function=CPI&interval={interval}&apikey={self.api_key}",
+            "RealGDPPerCapita": f"function=REAL_GDP_PER_CAPITA&apikey={self.api_key}",
+            "Inflation": f"function=INFLATION&apikey={self.api_key}",
+        }
+
+        # retrieve data from API and return as a dictionary
+        tasks = [self.get_data(endpoint) for endpoint in endpoints.values()]
+        responses = await asyncio.gather(*tasks)
+        self.economic_data = {
+            "CPI": responses[0],
+            "RealGDPPerCapita": responses[1],
+            "Inflation": responses[2],
         }
