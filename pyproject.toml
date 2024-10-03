@@ -43,7 +43,7 @@ dev = ["yc-pypi[test,release,static-code-qa]"]
 
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=61.0.0", "wheel", "numpy", "pandas", "fredapi"]
 build-backend = "setuptools.build_meta"
 
 # include more than only .py files in the distribution package (wheel)
