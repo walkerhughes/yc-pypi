@@ -17,7 +17,7 @@ class HistoricalFredDataAPI:
     """
     Wrapper class around FRED API to retrieve historical data on US Treasuty Yield Curve.
 
-    Args
+    Args:
     ----
     :fred_api_key str: API key for FRED API.
 
@@ -52,13 +52,16 @@ class HistoricalFredDataAPI:
         if frequency not in {"d", "w", "bw", "m", "q", "sa", "a"}:
             raise ValueError('Interval value must be one of: "d", "w", "bw", "m", "q", "sa", "a"')
         try:
+            # fetch historical data series from FRED
             data = self.fred.get_series(
                 series_id=fred_series_name,
                 observation_start=observation_start,
                 observation_end=observation_end,
                 frequency=frequency,
             )
+            # return data in pd.DataFrame object instead of pd.Series
             return pd.DataFrame({"Date": data.index, fred_series_name: data.values})
+        # raise error if a series is unavailable
         except Exception as e:
             raise ValueError(f"Could not retrieve series {fred_series_name}.\n\n{e}")
 
@@ -82,6 +85,7 @@ class HistoricalFredDataAPI:
             :pd.DataFrame: Pandas DataFrame object of historical data series joined together.
 
         """
+        # retrieve data for series in yc_central.constants.SERIES
         dfs = []
         for series_name in SERIES:
             dfs.append(
@@ -92,5 +96,6 @@ class HistoricalFredDataAPI:
                     frequency=frequency,
                 )
             )
+        # merge the individual dataframes together and return
         merged_dfs = reduce(lambda left, right: pd.merge(left, right, on="Date", how="left"), dfs)
         return merged_dfs
