@@ -43,7 +43,14 @@ dev = ["yc-pypi[test,release,static-code-qa]"]
 
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools>=61.0.0", "wheel", "numpy", "pandas", "fredapi"]
+requires = [
+    "setuptools>=61.0.0",
+    "wheel",
+    "numpy",
+    "pandas",
+    "fredapi",
+    "scikit-learn",
+]
 build-backend = "setuptools.build_meta"
 
 # include more than only .py files in the distribution package (wheel)
@@ -96,3 +103,6 @@ disable = [
     "too-few-public-methods",
     "redefined-outer-name",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
