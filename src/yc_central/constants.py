@@ -9,8 +9,8 @@ ONE_YEAR_PREV = TODAY - datetime.timedelta(365)
 SERIES = {
     "DTB4WK": "4-Week Treasury Bill Secondary Market Rate, Discount Basis",
     "DGS3MO": "Market Yield on U.S. Treasury Securities at 3-Month Constant Maturity, Quoted on an Investment Basis",
-    "DTB6": "6-Month Treasury Bill Secondary Market Rate, Discount Basis",
-    "DTB1YR": "1-Year Treasury Bill Secondary Market Rate, Discount Basis",
+    "DGS6MO": "Market Yield on U.S. Treasury Securities at 6-Month Constant Maturity, Quoted on an Investment Basis",
+    "DGS1": "Market Yield on U.S. Treasury Securities at 1-Year Constant Maturity, Quoted on an Investment Basis",
     "DGS2": "Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity, Quoted on an Investment Basis",
     "DGS5": "Market Yield on U.S. Treasury Securities at 5-Year Constant Maturity, Quoted on an Investment Basis",
     "DGS7": "Market Yield on U.S. Treasury Securities at 7-Year Constant Maturity, Quoted on an Investment Basis",
