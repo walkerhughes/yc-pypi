@@ -102,6 +102,8 @@ disable = [
     "import-error",
     "too-few-public-methods",
     "redefined-outer-name",
+    "invalid-name",
+    "raise-missing-from",
 ]
 
 [tool.mypy]
