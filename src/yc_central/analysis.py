@@ -4,149 +4,103 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from yc_central.historical import HistoricalFredDataAPI
 
-
-class DataAnalysis(HistoricalFredDataAPI):
+def calculate_yield_inversion(
+    df: pd.DataFrame,
+    short_term: str = "DGS2",
+    long_term: str = "DGS10",
+) -> pd.DataFrame:
     """
-    DataAnalysis class for performing analytical investigations on US Treasury Yield Curve data.
+    Calculate yield curve inversion based on the difference between long-term and short-term yields.
 
-    Inherits from HistoricalFredDataAPI to utilize data retrieval methods.
+    Args
+    ----
+        data_api (HistoricalFredDataAPI): Instance to retrieve yield data.
+        short_term (str): Series ID for short-term yield (e.g., "DGS2").
+        long_term (str): Series ID for long-term yield (e.g., "DGS10").
+
+    Returns
+    -------
+        pd.DataFrame: DataFrame with Date and Yield_Curve_Inversion columns.
 
     """
+    inversion_diff = df[long_term] - df[short_term]
+    return pd.DataFrame(
+        {
+            "Date": df["Date"].values,
+            f"{long_term}-{short_term}_Spread": inversion_diff,
+            f"{long_term}-{short_term}_Inversion": np.where(inversion_diff < 0, 1, 0),
+        }
+    )
 
-    def calculate_yield_curve_inversion(
-        self,
-        short_term: str = "DGS2",
-        long_term: str = "DGS10",
-    ) -> pd.DataFrame:
-        """
-        Calculate yield curve inversion based on the difference between long-term and short-term yields.
 
-        Args
-        ----
-            :short_term str: Series ID for short-term yield (e.g., "DGS2").
-            :long_term str: Series ID for long-term yield (e.g., "DGS10").
+def rolling_regression_coefficients(
+    df: pd.DataFrame,
+    dependent_var: str,
+    independent_var: str,
+    window: int = 2,
+) -> pd.DataFrame:
+    """
+    Perform rolling window regression and return rolling coefficients.
 
-        Returns
-        -------
-            :pd.DataFrame: DataFrame with an additional column indicating inversion (1) or normal (0).
+    Args
+    ----
+        df (pd.DataFrame): Dataframe of historical data.
+        dependent_var (str): Series ID for the dependent variable.
+        independent_var (str): Series ID for the independent variable.
+        window (int): Rolling window size.
 
-        """
-        data = self.get_all_yield_series()
-        inversion_diff = data[long_term] - data[short_term]
-        data["Yield_Curve_Inversion"] = np.where(inversion_diff < 0, 1, 0)
-        return data[["Date", "Yield_Curve_Inversion"]]
+    Returns
+    -------
+        pd.DataFrame: DataFrame with Date, Slope, and Intercept columns.
 
-    def calculate_contango_ratio(
-        self,
-        near_term: str = "DGS3MO",
-        far_term: str = "DGS10",
-    ) -> pd.DataFrame:
-        """
-        Calculate contango ratio based on the difference between far-term and near-term yields.
+    """
+    df = df[[dependent_var, independent_var]].ffill().reset_index(drop=True).dropna()
+    slopes = []
+    intercepts = []
+    window = 14
 
-        Args
-        ----
-            :near_term str: Series ID for near-term yield (e.g., "DGS3MO").
-            :far_term str: Series ID for far-term yield (e.g., "DGS10").
+    for i in range(len(df) - window + 1):
+        window_data = df.iloc[i : i + window]
+        X = window_data[independent_var].values.reshape(-1, 1)
+        y = window_data[dependent_var].values
+        model = LinearRegression()
+        model.fit(X, y)
+        slopes.append(model.coef_[0])
+        intercepts.append(model.intercept_)
 
-        Returns
-        -------
-            :pd.DataFrame: DataFrame with contango ratio.
+    rolling_dates = df["Date"].dropna().reset_index(drop=True)[window - 1 :]
 
-        """
-        data = self.get_all_yield_series()
-        contango_diff = data[far_term] - data[near_term]
-        data["Contango_Ratio"] = contango_diff / data[near_term]
-        return data[["Date", "Contango_Ratio"]]
+    regression_df = pd.DataFrame(
+        {
+            "Date": rolling_dates,
+            "Slope": slopes,
+            "Intercept": intercepts,
+        }
+    )
+    return regression_df
 
-    def rolling_regression_coefficients(
-        self,
-        dependent_var: str,
-        independent_var: str,
-        window: int = 60,
-    ) -> pd.DataFrame:
-        """
-        Perform rolling window regression and return rolling coefficients.
 
-        Args
-        ----
-            :dependent_var str: Series ID for the dependent variable.
-            :independent_var str: Series ID for the independent variable.
-            :window int: Rolling window size.
+def calculate_rolling_correlation(
+    df: pd.DataFrame,
+    series_id_1: str,
+    series_id_2: str,
+    window: int = 60,
+) -> pd.DataFrame:
+    """
+    Calculate rolling correlation between two specified series.
 
-        Returns
-        -------
-            :pd.DataFrame: DataFrame with rolling slope and intercept coefficients.
+    Args
+    ----
+        df (pd.DataFrame): Dataframe of historical data to analyze.
+        series_id_1 (str): First series ID.
+        series_id_2 (str): Second series ID.
+        window (int): Rolling window size.
 
-        """
-        data = self.get_all_yield_series()
-        df = data[[dependent_var, independent_var]].dropna().reset_index(drop=True)
+    Returns
+    -------
+        pd.DataFrame: DataFrame with Date and Rolling_Correlation columns.
 
-        slopes = []
-        intercepts = []
-        for i in range(len(df) - window + 1):
-            window_data = df.iloc[i : i + window]
-            X = window_data[independent_var].values.reshape(-1, 1)
-            y = window_data[dependent_var].values
-            model = LinearRegression()
-            model.fit(X, y)
-            slopes.append(model.coef_[0])
-            intercepts.append(model.intercept_)
-
-        rolling_dates = data["Date"].dropna().reset_index(drop=True)[window - 1 :]
-        regression_df = pd.DataFrame(
-            {
-                "Date": rolling_dates,
-                "Slope": slopes,
-                "Intercept": intercepts,
-            }
-        )
-        return regression_df
-
-    def calculate_rolling_volatility(
-        self,
-        series_id: str,
-        window: int = 30,
-    ) -> pd.DataFrame:
-        """
-        Calculate rolling volatility (standard deviation) for a specified series.
-
-        Args
-        ----
-            :series_id str: Series ID to calculate volatility for.
-            :window int: Rolling window size.
-
-        Returns
-        -------
-            :pd.DataFrame: DataFrame with rolling volatility.
-
-        """
-        data = self.get_single_series(fred_series_name=series_id)
-        data["Rolling_Volatility"] = data[series_id].rolling(window=window).std()
-        return data[["Date", "Rolling_Volatility"]]
-
-    def calculate_rolling_correlation(
-        self,
-        series_id_1: str,
-        series_id_2: str,
-        window: int = 60,
-    ) -> pd.DataFrame:
-        """
-        Calculate rolling correlation between two specified series.
-
-        Args
-        ----
-            :series_id_1 str: First series ID.
-            :series_id_2 str: Second series ID.
-            :window int: Rolling window size.
-
-        Returns
-        -------
-            :pd.DataFrame: DataFrame with rolling correlation.
-
-        """
-        data = self.get_all_yield_series()
-        data["Rolling_Correlation"] = data[series_id_1].rolling(window=window).corr(data[series_id_2])
-        return data[["Date", "Rolling_Correlation"]]
+    """
+    rolling_corr = df[series_id_1].rolling(window=window).corr(df[series_id_2])
+    return pd.DataFrame({"Date": df["Date"].values, f"{series_id_1}_{series_id_2}_Rolling_Correlation": rolling_corr})
